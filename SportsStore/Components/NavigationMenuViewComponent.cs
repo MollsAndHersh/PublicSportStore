@@ -1,6 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using System.Linq;
 using SportsStore.Models;
+using System.Collections.Generic;
+using SportsStore.Models.ViewModels;
 
 namespace SportsStore.Components
 {
@@ -16,10 +18,28 @@ namespace SportsStore.Components
         public IViewComponentResult Invoke()
         {
             ViewBag.SelectedCategory = RouteData?.Values["category"];
-            return View(repository.Products
-                .Select(x => x.Category)
-                .Distinct()
-                .OrderBy(x => x));
+            IEnumerable<string> categories = repository.Products
+                  .Select(x => x.Category)
+                  .Distinct()
+                  .OrderBy(x => x);
+
+            List<Category> cat = new List<Category>();
+            foreach (string c in categories)
+                cat.Add(new Category { Name = c });
+
+            CategoringInfo ci = new CategoringInfo
+            {
+                TotalCategories = categories.Count(),
+                Categories = cat
+            };
+
+            CategoryListViewModel clvm = new CategoryListViewModel
+            {
+                Categories = cat,
+                CategoringInfo = ci
+            };
+
+            return View(clvm);
         }
     }
 }
